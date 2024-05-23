@@ -17,6 +17,7 @@ const useSignup = () => {
         .then((response) => {
           if (response.status === 201) {
             toast.success("Account created successfully");
+            localStorage.setItem("token", response.data.token);
             navigate("/dashboard");
             console.log("Signed up", response.data);
           }

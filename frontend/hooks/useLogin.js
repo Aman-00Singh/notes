@@ -17,7 +17,7 @@ const useLogin = () => {
         .then((response) => {
           if (response.status === 200) {
             console.log("Logged in", response.data);
-
+            localStorage.setItem("token", response.data.token);
             navigate("/dashboard");
             toast.success("Logged in successfull");
           } else {

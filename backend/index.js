@@ -251,6 +251,26 @@ app.get("/api/notes/search-notes", protectRoutes, async (req, res) => {
   }
 });
 
+app.get("/api/get-user", protectRoutes, async (req, res) => {
+  try {
+    const { user } = req.user;
+    const isUser = await User.findOne({ _id: user._id });
+    if (!isUser) {
+      return res.status(400).json({ message: "User not found" });
+    }
+    return res.status(200).json({
+      user: {
+        _id: isUser._id,
+        fullname: isUser.fullname,
+        email: isUser.email,
+      },
+    });
+  } catch (error) {
+    console.log("Error in getting user", error.message);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 app.listen(PORT, () => {
   connect_db();
   console.log(`Server is listening to ${PORT}`);

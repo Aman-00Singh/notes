@@ -13,16 +13,16 @@ const getInitials = (name) => {
   }
   return initials.toUpperCase()
 }
-const Profileinfo = ({ onlogout }) => {
+const Profileinfo = ({ userInfo, onlogout }) => {
 
 
   return (
 
     <div className='flex items-center gap-3'>
-      <div className='w-12 h-12 flex items-center justify-center rounded-full text-slate-950 font-medium bg-slate-100'>{getInitials("John wick")}</div>
+      <div className='w-12 h-12 flex items-center justify-center rounded-full text-slate-950 font-medium bg-slate-100'>{getInitials(userInfo.fullname)}</div>
 
       <div>
-        <p className='text-sm font-medium'>John</p>
+        <p className='text-sm font-medium'>{userInfo.fullname}</p>
 
 
         <RiLogoutCircleLine className='text-sm text-slate-700' onClick={onlogout} />

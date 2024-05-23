@@ -4,14 +4,11 @@ import SearchBar from '../SearchBar/SearchBar'
 import { useNavigate } from 'react-router-dom'
 
 
-const Navbar = ({ searchNote, handleClearSearch }) => {
+const Navbar = ({ userInfo, searchNote, handleClearSearch }) => {
   const [search, setSearch] = useState('')
-
-
-
-
   const navigate = useNavigate()
   const onlogout = () => {
+    localStorage.clear()
     navigate("/login")
   }
 
@@ -31,7 +28,7 @@ const Navbar = ({ searchNote, handleClearSearch }) => {
 
   return (
     <div className='bg-white flex items-center justify-between px-6  py-2 drop-shadow'>
-      <h2 className='text-xl font-medium text-black py-2'>Write</h2>
+      <h2 className='text-xl font-medium text-black py-2'>Note</h2>
 
       <SearchBar
         value={search}
@@ -40,7 +37,7 @@ const Navbar = ({ searchNote, handleClearSearch }) => {
         onClearSearch={onClearSearch}
 
       />
-      <Profileinfo onlogout={onlogout} />
+      <Profileinfo userInfo={userInfo} onlogout={onlogout} />
     </div>
   )
 }

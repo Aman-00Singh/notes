@@ -6,6 +6,7 @@ import AddandEdit from '../AddandEdit/AddandEdit';
 import Modal from "react-modal"
 import toast from 'react-hot-toast';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'
 
 
 
@@ -13,11 +14,13 @@ import axios from 'axios';
 const Dashboard = () => {
     const [allNotes, setAllNotes] = useState([])
     const [isSearch, setIsSearch] = useState(false)
+    const [userInfo, setUserInfo] = useState(null)
     const [AddEditmodal, setAddEditmodal] = useState({
         isShown: "false",
         type: "add",
         data: "null"
     })
+    const navigate = useNavigate();
 
     const handleEdit = (noteDetails) => { setAddEditmodal({ isShown: true, data: noteDetails, type: "edit" }) }
 
@@ -40,6 +43,29 @@ const Dashboard = () => {
             return;
         }
     };
+
+    const getUserInfo = async () => {
+        try {
+            const response = await axios.get(
+                "http://localhost:3000/api/user/get-user"
+            );
+            if (!response) {
+                console.log("Error in response of getuser");
+                return;
+            }
+
+            if (response.status === 200) {
+                setUserInfo(response.data.user);
+            }
+        } catch (error) {
+            console.log("Error in getting user", error.message);
+            toast.error("Error in getting user");
+            localStorage.clear();
+            navigate("/login");
+            return;
+        }
+
+    }
 
     const deleteNote = async (data) => {
         try {
@@ -121,6 +147,7 @@ const Dashboard = () => {
 
 
     useEffect(() => {
+        getUserInfo();
         getAllnotes();
     }, [])
 
@@ -128,7 +155,8 @@ const Dashboard = () => {
         <>
             <div>
 
-                <Navbar
+                <Navbar userInfo={userInfo}
+
                     searchNote={searchNote} handleClearSearch={handleClearSearch} />
                 {allNotes.length > 0 ? (
 
@@ -153,8 +181,8 @@ const Dashboard = () => {
             </div>
 
             <div>
-                <button className="bg-white" onClick={() => { setAddEditmodal({ isShown: true, type: "add", data: null }) }}>
-                    <MdAdd />
+                <button className="w-16 h-16 flex items-center justify-center rounded-2xl bg-primary hover:bg-blue-600" onClick={() => { setAddEditmodal({ isShown: true, type: "add", data: null }) }}>
+                    <MdAdd className='text-[32px] text-white' />
                 </button>
 
             </div>
