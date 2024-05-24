@@ -4,7 +4,6 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 const useLogin = () => {
-  const navigate = useNavigate();
   const login = async (email, password) => {
     const success = handleLogin(email, password);
     if (!success) {
@@ -13,13 +12,15 @@ const useLogin = () => {
     try {
       const data = { email, password };
       const response = await axios
-        .post("http://localhost:3000/api/login", data)
+        .post("http://localhost:3000/api/login", data, { withCredentials: true })
         .then((response) => {
           if (response.status === 200) {
             console.log("Logged in", response.data);
-            localStorage.setItem("token", response.data.token);
-            navigate("/dashboard");
+            // localStorage.setItem("useremail", response.data.email);
+            // localStorage.setItem("fullname", response.data.fullname);
+            window.location.href = "/dashboard";
             toast.success("Logged in successfull");
+
           } else {
             throw new Error(error.message);
           }
