@@ -7,17 +7,22 @@ import Notes from "./models/notesmodel.js";
 import generateTokenandSetCookie from "./utils/generatetoken.js";
 import protectRoutes from "./middlewares/protectRoutes.js";
 import bcrypt from "bcryptjs";
-import { all } from "axios";
+import cookieParser from "cookie-parser";
+
 
 dotenv.config();
 const app = express();
+app.use(cookieParser());
 const PORT = 3000;
 
 app.use(express.json());
 
 app.use(
   cors({
-    origin: "*",
+    origin: ["*","http://localhost:5173"],
+    credentials: true,
+    AccessControlAllowOrigin: ['http://localhost:5173'],
+    AccessControlAllowCredentials: true
   })
 );
 
@@ -91,12 +96,16 @@ app.post("/api/login", async (req, res) => {
     return res.status(500).json({ message: "Error" });
   }
 });
+app.get("/api/logout", (req, res) => {
+  res.clearCookie("jwt");
+  res.status(200).json({ message: "Logged out" });
+});
 
 //add  notes
 app.post("/api/notes/add-notes", protectRoutes, async (req, res) => {
   try {
     const { title, content, tags } = req.body;
-    const { user } = req.user;
+    // const { user } = req.user;
     if (!title || !content) {
       return res.status(400).json({ message: "Plz input both the fields" });
     }
@@ -104,7 +113,7 @@ app.post("/api/notes/add-notes", protectRoutes, async (req, res) => {
       title: title,
       content: content,
       tags: tags || [],
-      userId: user._id,
+      userId: req.user._id,
     });
 
     if (newNotes) {
@@ -133,7 +142,7 @@ app.put("/api/notes/edit-notes/:noteId", protectRoutes, async (req, res) => {
   try {
     const update_notes = await Notes.findOne({
       _id: noteId,
-      userId: user._id,
+      userId: req.user._id,
     });
     if (!update_notes) {
       return res.status(400).json({ message: "Note not found" });
@@ -157,7 +166,7 @@ app.put("/api/notes/edit-notes/:noteId", protectRoutes, async (req, res) => {
 app.get("/api/notes/get-all-notes", protectRoutes, async (req, res) => {
   try {
     const { user } = req.user;
-    const all_notes = await Notes.find({ userId: user._id });
+    const all_notes = await Notes.find({ userId: req.user._id });
     if (!all_notes) {
       return res.status(400).json({
         message: "Notes not found",
@@ -181,17 +190,19 @@ app.delete(
   protectRoutes,
   async (req, res) => {
     try {
-      const noteId = req.params;
+      const {noteId} = req.params;
       const { user } = req.user;
-      const delete_note = await Notes.findOne({
-        _id: noteId,
-        userId: user._id,
-      });
+    //   find the note with given id and user id 
+      const delete_note = await Notes.findOneAndDelete(
+        { _id: noteId, userId: req.user._id }
+      );
+
+      
       if (!delete_note) {
         return res.status(200).json({ message: "Note not found" });
       }
 
-      await Notes.deleteOne({ _id: noteId, userId: user._id });
+      await Notes.deleteOne({ _id: noteId, userId: req.user._id });
 
       return res.status(200).json({
         message: "Note deleted successfully",
@@ -227,15 +238,15 @@ app.put("/api/note/note-isPinned/:noteId", protectRoutes, async (req, res) => {
 });
 
 // Search Notes
-app.get("/api/notes/search-notes", protectRoutes, async (req, res) => {
+app.get("/api/notes/search-notes/:query", protectRoutes, async (req, res) => {
   try {
-    const { user } = req.user;
-    const { search } = req.body;
+
+    const { query } = req.params;
     const search_notes = await Notes.find({
-      userId: user._id,
+      userId: req.user._id,
       $or: [
-        { title: { $regex: new RegExp(search, "i") } },
-        { content: { $regex: new RegExp(search, "i") } },
+        { title: { $regex: new RegExp(query, "i") } },
+        { content: { $regex: new RegExp(query, "i") } },
       ],
     });
     if (!search_notes) {
@@ -251,13 +262,14 @@ app.get("/api/notes/search-notes", protectRoutes, async (req, res) => {
   }
 });
 
-app.get("/api/get-user", protectRoutes, async (req, res) => {
+app.get("/api/user/getuser", protectRoutes, async (req, res) => {
   try {
-    const { user } = req.user;
-    const isUser = await User.findOne({ _id: user._id });
+    const isUser = await User.findOne({ _id: req.user._id });
     if (!isUser) {
       return res.status(400).json({ message: "User not found" });
     }
+
+    
     return res.status(200).json({
       user: {
         _id: isUser._id,
@@ -270,6 +282,12 @@ app.get("/api/get-user", protectRoutes, async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 });
+
+
+
+app.use(express.json());
+app.use(express.urlencoded({extended: true}));
+
 
 app.listen(PORT, () => {
   connect_db();

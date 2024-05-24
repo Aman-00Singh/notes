@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react'
 import { MdAdd, MdClose } from 'react-icons/md'
-import debounce from 'lodash/debounce'
+// import debounce from 'lodash/debounce'
 
 const InputTags = ({ tags, setTags }) => {
     const [inputValue, setInputValue] = useState("")
@@ -24,16 +24,16 @@ const InputTags = ({ tags, setTags }) => {
 
     return (
         <>
-            <div>
+            <div className='p-3'>
                 {tags?.length > 0 && (
-                    <div className='flex items-center gap-2 flex-wrap mt-2'>
+                    <div className=''>
                         {tags?.map((tag, index) => (
-                            <span key={index} className="">
+                            <div key={index} className="text-md px-3 py-1 gap-2 text-white mt-2 bg-green-500 w-fit rounded-full flex items-center">
                                 #{tag}
                                 <button onClick={() => { handleRemovetag(tag) }}>
                                     <MdClose />
                                 </button>
-                            </span>
+                            </div>
                         ))}
                     </div>
                 )}
@@ -42,16 +42,20 @@ const InputTags = ({ tags, setTags }) => {
 
 
             </div>
+            <div className='flex items-center p-5'>
             <input
                 type="text"
                 placeholder='Add tags'
                 value={inputValue}
                 onChange={(e) => { setInputValue(e.target.value) }}
-                onKeyDown={handleKeydown} />
+                onKeyDown={handleKeydown} 
+                className='text-lg text-slate-950 outline-none p-2 resize-none'
+                />
 
             <button onClick={() => { addnewtag() }}>
-                <MdAdd className='text-2xl text-blue-700 hover:text-white' />
+                <MdAdd className='text-2xl text-blue-800 font-semibold ' />
             </button>
+            </div>
         </>
     )
 }
